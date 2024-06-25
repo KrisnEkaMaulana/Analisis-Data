@@ -17,21 +17,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-# Set style seaborn
+#Set style seaborn
 sns.set(style='dark')
 
-# Menyiapkan data day_df
+#Menyiapkan data day_df
 day_df = pd.read_csv("day.csv")
 day_df.head()
 
-# Menghapus kolom yang tidak diperlukan
+#Menghapus kolom yang tidak diperlukan
 drop_col = ['windspeed']
 
 for i in day_df.columns:
   if i in drop_col:
     day_df.drop(labels=i, axis=1, inplace=True)
 
-# Mengubah nama judul kolom
+#Mengubah nama judul kolom
 day_df.rename(columns={
     'dteday': 'dateday',
     'yr': 'year',
@@ -40,7 +40,7 @@ day_df.rename(columns={
     'cnt': 'count'
 }, inplace=True)
 
-# Mengubah angka menjadi keterangan
+#Mengubah angka menjadi keterangan
 day_df['month'] = day_df['month'].map({
     1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
     7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
@@ -66,26 +66,26 @@ def create_daily_rent_df(df):
     }).reset_index()
     return daily_rent_df
 
-# Menyiapkan daily_casual_rent_df
+#Menyiapkan daily_casual_rent_df
 def create_daily_casual_rent_df(df):
     daily_casual_rent_df = df.groupby(by='dateday').agg({
         'casual': 'sum'
     }).reset_index()
     return daily_casual_rent_df
 
-# Menyiapkan daily_registered_rent_df
+#Menyiapkan daily_registered_rent_df
 def create_daily_registered_rent_df(df):
     daily_registered_rent_df = df.groupby(by='dateday').agg({
         'registered': 'sum'
     }).reset_index()
     return daily_registered_rent_df
     
-# Menyiapkan season_rent_df
+#Menyiapkan season_rent_df
 def create_season_rent_df(df):
     season_rent_df = df.groupby(by='season')[['registered', 'casual']].sum().reset_index()
     return season_rent_df
 
-# Menyiapkan monthly_rent_df
+#Menyiapkan monthly_rent_df
 def create_monthly_rent_df(df):
     monthly_rent_df = df.groupby(by='month').agg({
         'count': 'sum'
@@ -97,28 +97,28 @@ def create_monthly_rent_df(df):
     monthly_rent_df = monthly_rent_df.reindex(ordered_months, fill_value=0)
     return monthly_rent_df
 
-# Menyiapkan weekday_rent_df
+#Menyiapkan weekday_rent_df
 def create_weekday_rent_df(df):
     weekday_rent_df = df.groupby(by='weekday').agg({
         'count': 'sum'
     }).reset_index()
     return weekday_rent_df
 
-# Menyiapkan workingday_rent_df
+#Menyiapkan workingday_rent_df
 def create_workingday_rent_df(df):
     workingday_rent_df = df.groupby(by='workingday').agg({
         'count': 'sum'
     }).reset_index()
     return workingday_rent_df
 
-# Menyiapkan holiday_rent_df
+#Menyiapkan holiday_rent_df
 def create_holiday_rent_df(df):
     holiday_rent_df = df.groupby(by='holiday').agg({
         'count': 'sum'
     }).reset_index()
     return holiday_rent_df
 
-# Menyiapkan weather_rent_df
+#Menyiapkan weather_rent_df
 def create_weather_rent_df(df):
     weather_rent_df = df.groupby(by='weather_cond').agg({
         'count': 'sum'
@@ -126,7 +126,7 @@ def create_weather_rent_df(df):
     return weather_rent_df
 
 
-# Membuat komponen filter
+#Membuat komponen filter
 min_date = pd.to_datetime(day_df['dateday']).dt.date.min()
 max_date = pd.to_datetime(day_df['dateday']).dt.date.max()
  
@@ -143,7 +143,7 @@ with st.sidebar:
 main_df = day_df[(day_df['dateday'] >= str(start_date)) & 
                 (day_df['dateday'] <= str(end_date))]
 
-# Menyiapkan berbagai dataframe
+#Menyiapkan berbagai dataframe
 daily_rent_df = create_daily_rent_df(main_df)
 daily_casual_rent_df = create_daily_casual_rent_df(main_df)
 daily_registered_rent_df = create_daily_registered_rent_df(main_df)
@@ -155,12 +155,12 @@ holiday_rent_df = create_holiday_rent_df(main_df)
 weather_rent_df = create_weather_rent_df(main_df)
 
 
-# Membuat Dashboard secara lengkap
+### Membuat Dashboard secara lengkap
 
-# Membuat judul
+#Membuat judul
 st.header('Bike Rental Dashboard 🚲')
 
-# Membuat jumlah penyewaan harian
+#Membuat jumlah penyewaan harian
 st.subheader('Daily Rentals')
 col1, col2, col3 = st.columns(3)
 
@@ -176,11 +176,11 @@ with col3:
     daily_rent_total = daily_rent_df['count'].sum()
     st.metric('Total User', value= daily_rent_total)
 
-# Membuat jumlah penyewaan bulanan
+#Membuat jumlah penyewaan bulanan
 st.subheader('Monthly Rentals')
 fig, ax = plt.subplots(figsize=(24, 8))
 
-# Plot total count
+#Plot total count
 ax.plot(
     monthly_rent_df.index,
     monthly_rent_df['count'],
@@ -190,15 +190,15 @@ ax.plot(
     label='Total Count'
 )
 
-# Plot average count
+#Plot average count
 average_count = monthly_rent_df['count'].mean()
 ax.axhline(y=average_count, color='tab:red', linestyle='--', label='Average Count')
 
-# Annotate total count
+#Annotate total count
 for index, row in enumerate(monthly_rent_df['count']):
     ax.text(index, row + 1, str(row), ha='center', va='bottom', fontsize=12)
 
-# Annotate average count
+#Annotate average count
 ax.text(len(monthly_rent_df) - 1, average_count + 1, f'Avg: {average_count:.2f}', ha='center', va='bottom', fontsize=12, color='tab:red')
 
 ax.tick_params(axis='x', labelsize=25, rotation=45)
@@ -207,7 +207,7 @@ ax.legend()
 st.pyplot(fig)
 
 
-# Membuah jumlah penyewaan berdasarkan kondisi cuaca
+#Membuah jumlah penyewaan berdasarkan kondisi cuaca
 st.subheader('Weatherly Rentals')
 
 fig, ax = plt.subplots(figsize=(16, 8))
@@ -230,7 +230,7 @@ ax.tick_params(axis='x', labelsize=20)
 ax.tick_params(axis='y', labelsize=15)
 st.pyplot(fig)
 
-# Membuat jumlah penyewaan berdasarkan weekday, working dan holiday
+#Membuat jumlah penyewaan berdasarkan weekday, working dan holiday
 st.subheader('Weekday, Workingday, and Holiday Rentals')
 
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(15,10))
@@ -239,7 +239,7 @@ colors1=["tab:blue", "tab:orange"]
 colors2=["tab:blue", "tab:orange"]
 colors3=["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink"]
 
-# Berdasarkan workingday
+#Berdasarkan workingday
 sns.barplot(
     x='workingday',
     y='count',
@@ -255,7 +255,7 @@ axes[0].set_ylabel(None)
 axes[0].tick_params(axis='x', labelsize=15)
 axes[0].tick_params(axis='y', labelsize=10)
 
-# Berdasarkan holiday
+#Berdasarkan holiday
 sns.barplot(
   x='holiday',
   y='count',
@@ -271,7 +271,7 @@ axes[1].set_ylabel(None)
 axes[1].tick_params(axis='x', labelsize=15)
 axes[1].tick_params(axis='y', labelsize=10)
 
-# Berdasarkan weekday
+#Berdasarkan weekday
 sns.barplot(
   x='weekday',
   y='count',
